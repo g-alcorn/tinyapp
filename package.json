@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/g-alcorn/tinyapp/issues"
   },
-  "homepage": "https://github.com/g-alcorn/tinyapp#readme"
+  "homepage": "https://github.com/g-alcorn/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
