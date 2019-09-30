@@ -19,20 +19,27 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars)
 });
 
-app.post("/urls", (req, res) => {
-  console.log(req.body);
-  let newURL = generateRandomString();
-  res.send(newURL);
-});
-
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+app.post("/urls", (req, res) => {
+  let newURL = generateRandomString();
+  urlDatabase[newURL] = req.body.longURL;
+  res.redirect(301, `/urls/${newURL}`);
+});
+
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: "long egg"};
+  let templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL};
   res.render("urls_show", templateVars);
 });
+
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = "http://" + urlDatabase[req.params.shortURL];
+  console.log(longURL);
+  res.redirect(longURL);
+});
+
 
 function generateRandomString() {
   const characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
