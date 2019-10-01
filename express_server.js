@@ -40,6 +40,13 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const toDelete = req.params.shortURL;
+  console.log(toDelete);
+  delete urlDatabase[toDelete];
+  res.redirect("/urls");
+});
+
 
 function generateRandomString() {
   const characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
