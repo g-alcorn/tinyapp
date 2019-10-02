@@ -14,19 +14,38 @@
     </div>
     
    
-    <% if(username) { %>
+    <% if(userId) { %>
         <form class="form-inline" action="/logout" method="POST">
-        <p class="text-right"><%= username %></p>
+        <p class="text-left">Logged in: <%= email %>   </p>
         <button type="submit" class="btn btn-warning">Logout</button>
         </form>
       <% } else { %>
-          <form class="form-inline" action="/login" method="POST">  
-          <div class="form-group">
-            <label for="username">Enter username:</label>
-            <input class="form-control" type="text" name="username" placeholder="..." style="width: 200px; margin: 10px">
-            <button type="submit" class="btn btn-secondary">Login</button>
-          </div>
+        <table>
+          <tr>
+            <td></td>
+            <td><p class="text-center">Register here!</p></td>
+            <td></td>
+            <td></td>
+            <td><p class="text-center">Sign in here!</p></td>
+            <td></td>
+          </tr>
+          <tr>
+          <div class="form-group"></div>
+          <form class="form-inline" action="/register" method="POST">
+            <td><input class="form-control" type="email" name="email" placeholder="your@email.here" style="Width: 100px"></td>
+            <td><input class="form-control" type="password" name="password" placeholder="*****" style="width: 80px"></td>
+            <td><button type="submit" class="btn btn-secondary">Register</button></td>
           </form>
+          <form class="form-inline" action="/login" method="POST">
+            <td><input class="form-control" type="email" name="email" placeholder="your@email.here" style="width: 100px; margin: 10px"></td>
+            <td><input class="form-control" type="password" name="password" placeholder="*****" style="width: 80px; margin: 10px"></td>
+            <td><button type="submit" class="btn btn-secondary">Login</button></td>
+          </form>
+          </div>
+          </tr>
+        </table>
+
+
         <% } %>
       </nav>
 </header>
