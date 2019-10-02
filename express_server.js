@@ -92,8 +92,9 @@ app.post("/register", (req, res) => {
     password
   };
 
-  console.log(users);
-  res.cookie("userId", userId);
+  res
+    .cookie("userId", userId)
+    .cookie("email", email);
   res.redirect("/urls/");
 });
 
@@ -123,9 +124,10 @@ app.post("/urls/:shortURL/update", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
+  console.log(req.body.email);
   res
     .cookie("email", req.body.email)
-    .cookie("loggedIn", true);
+    .cookie("userId", req.body.userId)
 
   console.log('email is ' + req.body.email);
   res.redirect("/urls");
@@ -133,7 +135,6 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.clearCookie("email");
-  res.clearCookie("loggedIn");
   res.clearCookie("userId");
   res.redirect("/urls");
 });
