@@ -82,9 +82,31 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+app.get("/register", (req, res) => {
+  let templateVars = {
+    userId: null
+  };
+
+  res.render("register", templateVars);
+});
+
+app.get("/login", (req, res) => {
+  let templateVars = {
+    userId: null
+  };
+
+  res.render("login", templateVars);
+});
+
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
   let userId = generateRandomString();
+
+  for (clientId in users) {
+    if (email === users[clientId].email) {
+      res.redirect("/urls");
+    }
+  }
 
   users[userId] = {
     userId,
@@ -124,13 +146,22 @@ app.post("/urls/:shortURL/update", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  console.log(req.body.email);
-  res
-    .cookie("email", req.body.email)
-    .cookie("userId", req.body.userId)
+  const {email, password } = req.body;
+  
+  for (client in users) {
+    if (!users[client].email) {
+      res.redirect("/urls");
+    } else if (users[client].email && users[client].password !== password) {
+      res.redirect("/urls");
+    } else if (users[client].email && users[client].password === password) {
+      res
+        .cookie("email", email)
+        .cookie("userId", users[client]);
 
-  console.log('email is ' + req.body.email);
-  res.redirect("/urls");
+      console.log('email is ' + req.body.email);
+      res.redirect("/urls");
+    }
+  }
 });
 
 app.post("/logout", (req, res) => {
