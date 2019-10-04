@@ -8,26 +8,29 @@ app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
+//URL DATABASE
 const urlDatabase = {
   "b2xVn2": { longUrl: "www.lighthouselabs.ca", userId: "testUser" },
   "9sm5xK": { longUrl: "www.google.com", userId: "testUser2" }
 };
 
+//USER DATABASE
 const users = {
   testUser: {
     id: "testUser",
     email: "aaaa@aaaa.com",
-    password: "test"
+    password: bcrypt.hashSync("test", 10)
   }
 };
 
+//SHOW LIST OF URLs via redirect
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 
+//SHOW LIST OF URLs
 app.get("/urls", (req, res) => {
   let templateVars = {};
-
   if (req.cookies["userId"]) {
     templateVars.loggedIn = true;
     templateVars.email = req.cookies["userId"].email;
@@ -49,6 +52,7 @@ app.get("/urls", (req, res) => {
 
 });
 
+//SHOW CREATE NEW SHORT URL PAGE
 app.get("/urls/new", (req, res) => {
   let templateVars = {};
 
@@ -64,6 +68,7 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
+//SHOW EDIT URL PAGE FOR PRE-EXISTING SHORT URLs
 app.get("/urls/:shortURL", (req, res) => {
   let shortUrl = req.params.shortURL;
   let longUrl = urlDatabase[shortUrl].longUrl;
@@ -85,12 +90,14 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+//REDIRECT TO LONG URL
 app.get("/u/:shortURL", (req, res) => {
   const longURL = "http\://" + urlDatabase[req.params.shortURL].longUrl;
   console.log(longURL);
   res.redirect(longURL);
 });
 
+//REGISTER PAGE
 app.get("/register", (req, res) => {
   let templateVars = {
     userId: null
@@ -99,6 +106,7 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
+//LOGIN PAGE
 app.get("/login", (req, res) => {
   let templateVars = {
     userId: null
@@ -107,8 +115,10 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 });
 
+//REGISTER BUTTON CLICK
 app.post("/register", (req, res) => {
-  const { email, password } = req.body;
+  const { email } = req.body;
+  const { password } = bcrypt.hashSync(req.body.password, 10);
   let userId = generateRandomString();
 
   for (clientId in users) {
@@ -129,6 +139,7 @@ app.post("/register", (req, res) => {
   res.redirect("/urls/");
 });
 
+//GENERATE NEW SHORT URL
 app.post("/urls", (req, res) => {
   if (!req.cookies.userId) {
     res.redirect("/urls/");
@@ -139,12 +150,13 @@ app.post("/urls", (req, res) => {
   res.redirect(301, `/urls/${newURL}`);
 });
 
-
+//SHORT URL CLICK & REDIRECT
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   res.redirect(`/urls/${shortURL}`)
 });
 
+//DELETE BUTTON CLICK
 app.post("/urls/:shortURL/delete", (req, res) => {
   const toDelete = req.params.shortURL;
   if (!req.cookies) {
@@ -160,6 +172,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   }
 });
 
+//UPDATE URL ALREADY IN DATABASE
 app.post("/urls/:shortURL/update", (req, res) => {
   const shortUrl = req.params.shortURL;
   if (!req.cookies) {
@@ -176,15 +189,21 @@ app.post("/urls/:shortURL/update", (req, res) => {
   }
 });
 
+//LOGIN BUTTON PRESS
 app.post("/login", (req, res) => {
   const {email, password } = req.body;
-  
-  for (client in users) {
-    if (!users[client].email) {
-      res.redirect("/urls");
-    } else if (users[client].email && users[client].password !== password) {
-      res.redirect("/urls");
-    } else if (users[client].email && users[client].password === password) {
+  console.log(password);
+
+  for (client in users) {  
+    
+    if (users[client].email !== email) {
+      console.log("bad email");
+      res.redirect("/login");
+    } else if (users[client].email === email && !bcrypt.compareSync(password, users[client].password)) {
+      console.log("bad password");
+      res.redirect("/login");
+    } else if (users[client].email === email && bcrypt.compareSync(password, users[client].password)) {
+      console.log(users[client].password);
       res
         .cookie("email", email)
         .cookie("userId", users[client]);
@@ -195,12 +214,14 @@ app.post("/login", (req, res) => {
   }
 });
 
+//LOGOUT BUTTON PRESS
 app.post("/logout", (req, res) => {
   res.clearCookie("email");
   res.clearCookie("userId");
   res.redirect("/urls");
 });
 
+//GENERATE SHORT URL STRING
 function generateRandomString() {
   const characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
   let length = characters.length;
