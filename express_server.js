@@ -9,8 +9,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
 const urlDatabase = {
-  "b2xVn2": "www.lighthouselabs.ca",
-  "9sm5xK": "www.google.com"
+  "b2xVn2": { longUrl: "www.lighthouselabs.ca", userId: "testUser" },
+  "9sm5xK": { longUrl: "www.google.com", userId: "testUser2" }
 };
 
 const users = {
@@ -26,44 +26,53 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { 
-    urls: urlDatabase,
-  };
+  let templateVars = {};
 
-  if (req.cookies) {
+  if (req.cookies["userId"]) {
     templateVars.loggedIn = true;
-    templateVars.email = req.cookies["email"];
-    templateVars.userId = req.cookies["userId"];
+    templateVars.email = req.cookies["userId"].email;
+    templateVars.userId = req.cookies["userId"].id;
+    templateVars.urls = {};
+    
+    for (let url in urlDatabase) {
+      if (urlDatabase[url].userId === req.cookies["userId"].id) {
+        templateVars.urls[url] = urlDatabase[url];
+      }
+    }
+
+    res.render("urls_index", templateVars);
   } else {
-    templateVars.loggedIn = false;
-    templateVars.email = false;
-    templateVars.userId = false;
+    console.log("not logged in - redirecting1")
+    templateVars.userId = null;
+    res.render("login", templateVars);
   }
 
-  res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {};
-  if (req.cookies) {
+
+  if (!req.cookies.email) {
+    templateVars.userId = null;
+    console.log("not logged in - redirecting");
+    res.render("login", templateVars);
+  } else {  
     templateVars.loggedIn = true;
     templateVars.email = req.cookies["email"];
     templateVars.userId = req.cookies["userId"];
-  } else {  
-    templateVars.loggedIn = false;
-    templateVars.email = false;
-    templateVars.userId = false;
-  };
-  res.render("urls_new", templateVars);
+    res.render("urls_new", templateVars);
+  }
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  let shortUrl = req.params.shortURL;
+  let longUrl = urlDatabase[shortUrl].longUrl;
   let templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: req.params.longURL,
+    shortUrl,
+    longUrl
   };
 
-  if (req.cookies) {
+  if (req.cookies.email) {
     templateVars.loggedIn = true;
     templateVars.email = req.cookies["email"];
     templateVars.userId = req.cookies["userId"];
@@ -77,7 +86,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = "http\://" + urlDatabase[req.params.shortURL];
+  const longURL = "http\://" + urlDatabase[req.params.shortURL].longUrl;
   console.log(longURL);
   res.redirect(longURL);
 });
@@ -94,7 +103,7 @@ app.get("/login", (req, res) => {
   let templateVars = {
     userId: null
   };
-
+  console.log("redirected to login...");
   res.render("login", templateVars);
 });
 
@@ -121,8 +130,12 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
+  if (!req.cookies.userId) {
+    res.redirect("/urls/");
+  }
   let newURL = generateRandomString();
-  urlDatabase[newURL] = req.body.longURL;
+  console.log(req.body.longURL + req.cookies);
+  urlDatabase[newURL] = { longUrl: req.body.longURL, userId: req.cookies.userId };
   res.redirect(301, `/urls/${newURL}`);
 });
 
@@ -134,15 +147,33 @@ app.post("/urls/:shortURL", (req, res) => {
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   const toDelete = req.params.shortURL;
-  console.log(toDelete);
-  delete urlDatabase[toDelete];
-  res.redirect("/urls");
+  if (!req.cookies) {
+    console.log("not logged in - cannot delete");
+    res.redirect("login");
+  } else if (req.cookies["userId"] !== urlDatabase[toDelete].userId) {
+    console.log("cannot delete links created by other users!");
+    res.redirect("/urls");
+  } else {
+    console.log("deleting " + toDelete);
+    delete urlDatabase[toDelete];
+    res.redirect("/urls");
+  }
 });
 
 app.post("/urls/:shortURL/update", (req, res) => {
-  const shortURL = req.params.shortURL;
-  urlDatabase[shortURL] = req.body.longURL;
-  res.redirect("/urls");
+  const shortUrl = req.params.shortURL;
+  if (!req.cookies) {
+    console.log("not logged in - cannot update");
+    res.redirect("login");
+  } else if (req.cookies.userId.id !== urlDatabase[shortUrl].userId) {
+    console.log(req.cookies.userId.id + " " + shortUrl + " " + urlDatabase[shortUrl].userId);
+    console.log("cannot update links created by other users!");
+    res.redirect("/urls");
+  } else {
+    urlDatabase[shortUrl].longUrl = req.body.longURL;
+    console.log("updated URL successfully");
+    res.redirect("/urls");    
+  }
 });
 
 app.post("/login", (req, res) => {

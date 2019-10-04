@@ -18,16 +18,20 @@
           <tr>
             <th scope="col">Short URL</th>
             <th scope="col">Long URL</th>
+            <th scope="col">Username</th>
           </tr>
         </thead>
         <tbody>
           <% for(let url in urls) { %>
+            <% if (url.userId = userId) { %>
             <tr>
               <td><%= url %></td>
-              <td><%= urls[url] %></td>
+              <td><%= urls[url].longUrl %></td>
+              <td><%= userId %></td> 
               <td><form method="POST" action="/urls/<%= url %>/"><button type="submit" class="btn btn-info">Edit</button></form></td>
               <td><form method="POST" action="/urls/<%= url %>/delete"><button type="submit" class="btn btn-danger">Delete</button></form></td>
             </tr>
+            <% } %>
           <% } %>
         </tbody>
       </table>

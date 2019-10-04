@@ -11,8 +11,8 @@
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
-        <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
+        <h5 class="card-title">TinyURL for: <%= longUrl %></h5>
+        <p class="card-text">Short URL: <a href="/u/<%= shortUrl %>"><%= shortUrl %></a></p>
         <table class="table">
           <thead>
             <tr>Edit URL</tr>
@@ -20,7 +20,7 @@
           
           <tbody>   
               <div class="form-group row"> 
-                  <form class="form" action="/urls/<%= shortURL%>/update" method="POST">
+                  <form class="form" action="/urls/<%= shortUrl%>/update" method="POST">
                     <td><input class="form-control" type="text" name="longURL" placeholder="http://" style="width: 200px; margin: 2em"></td>
                     <td><button type="submit" class="btn btn-primary" style="margin: 2em">Update</button></td>
                     
