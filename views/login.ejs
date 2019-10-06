@@ -11,11 +11,14 @@
     <header>
       <%- include partials/_header.ejs %>
     </header>
-    <h1>Login</h1>
-    <form class="form-group" action="/login" method="POST">
-      <input class="form-control" type="email" name="email" placeholder="your@email.here" style="width: 300px; margin: 10px">
-      <input class="form-control" type="password" name="password" placeholder="*****" style="width: 300px; margin: 10px">
-      <button type="submit" class="btn btn-secondary">Login</button>
-    </form>
+    <h3>Login</h3>
+    <table>
+      <form class="form-group" action="/login" method="POST">
+        <tr><input class="form-control" type="email" name="email" placeholder="your@email.here" style="width: 300px; margin: 30px"></tr>
+        <tr><input class="form-control" type="password" name="password" placeholder="*****" style="width: 300px; margin: 30px"></tr>
+        <tr><button type="submit" class="btn btn-secondary" style="margin: 30px">Login</button></tr>
+      </form>
+    </table>
+
   </body>
 </html>
